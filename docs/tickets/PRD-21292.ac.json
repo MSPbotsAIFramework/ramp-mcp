@@ -1,0 +1,99 @@
+[
+  {
+    "id": "TC1",
+    "ac": "AC1",
+    "text": "Given valid X-Ramp-Client-Id/X-Ramp-Client-Secret headers, when the agent calls tools/list, then it receives exactly the 7 v1 tools with non-empty descriptions and parameter schemas; GET /health returns 200 {\"status\":\"ok\"} even when Ramp is mocked as unreachable.",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_tools_list_returns_the_seven_v1_tools", "tests/test_tools.py::test_health_does_not_depend_on_ramp"]
+  },
+  {
+    "id": "TC2",
+    "ac": "AC2",
+    "text": "Given a POST /mcp request missing X-Ramp-Client-Secret, when any tool is called, then the server returns 401 naming the missing header, and the mocked Ramp API receives zero calls.",
+    "type": "auto",
+    "tests": ["tests/test_middleware.py::test_missing_header_returns_401_before_calling_ramp"]
+  },
+  {
+    "id": "TC3",
+    "ac": "AC3",
+    "text": "Given valid credentials, when ramp_list_transactions is called with from_date/to_date/department_id against a mocked multi-record response, then only records matching every filter are returned, each with id/amount/currency/state/merchant/card_holder/department present.",
+    "type": "auto",
+    "tests": ["tests/tools/test_transactions.py::test_list_transactions_filters_by_date_range_and_department"]
+  },
+  {
+    "id": "TC4",
+    "ac": "AC4",
+    "text": "Given a 2-page mocked list response on a v1 list tool, when the agent re-calls the tool with the first page's next_cursor, then it receives page 2 with no overlap with page 1, and the last page's next_cursor is null.",
+    "type": "auto",
+    "tests": ["tests/tools/test_transactions.py::test_list_transactions_pagination_cursor_round_trip"]
+  },
+  {
+    "id": "TC5",
+    "ac": "AC5",
+    "text": "Given a transaction_id the mock does not recognize, when ramp_get_transaction is called, then it returns a structured not_found error envelope, not an unhandled exception or 500.",
+    "type": "auto",
+    "tests": ["tests/tools/test_transactions.py::test_get_transaction_unknown_id_returns_not_found_error"]
+  },
+  {
+    "id": "TC6",
+    "ac": "AC6",
+    "text": "Given card_type=\"physical\" or \"virtual\", when ramp_list_cards is called, then it calls the matching Ramp endpoint (/cards/physical or /cards/virtual) only and returns only cards of that type.",
+    "type": "auto",
+    "tests": ["tests/tools/test_cards.py::test_list_cards_physical_calls_physical_endpoint_only", "tests/tools/test_cards.py::test_list_cards_virtual_calls_virtual_endpoint_only"]
+  },
+  {
+    "id": "TC7",
+    "ac": "AC7",
+    "text": "Given valid credentials and an email filter, when ramp_list_users is called, then only the matching mocked user record is returned.",
+    "type": "auto",
+    "tests": ["tests/tools/test_users.py::test_list_users_filters_by_email"]
+  },
+  {
+    "id": "TC8",
+    "ac": "AC7",
+    "text": "Given valid credentials and a state filter, when ramp_list_reimbursements is called, then only matching mocked records are returned.",
+    "type": "auto",
+    "tests": ["tests/tools/test_reimbursements.py::test_list_reimbursements_filters_by_state"]
+  },
+  {
+    "id": "TC9",
+    "ac": "AC7",
+    "text": "Given valid credentials and vendor_id + payment_status filters, when ramp_list_bills is called, then only matching mocked records are returned.",
+    "type": "auto",
+    "tests": ["tests/tools/test_bills.py::test_list_bills_filters_by_vendor_and_payment_status"]
+  },
+  {
+    "id": "TC10",
+    "ac": "AC7",
+    "text": "Given valid credentials and a name filter, when ramp_list_vendors is called, then only the matching mocked vendor record is returned.",
+    "type": "auto",
+    "tests": ["tests/tools/test_vendors.py::test_list_vendors_filters_by_name"]
+  },
+  {
+    "id": "TC11",
+    "ac": "AC8",
+    "text": "Given Ramp responds 429 to a proxied call, when the tool call completes, then it returns a structured error envelope with code=rate_limited and the upstream trace id, without raising and without a silent retry loop.",
+    "type": "auto",
+    "tests": ["tests/tools/test_transactions.py::test_rate_limited_upstream_response_maps_to_structured_error"]
+  },
+  {
+    "id": "TC12",
+    "ac": "AC9",
+    "text": "Given two tool calls arrive concurrently with two different Client-Id/Client-Secret header pairs, when both execute, then each caller receives only its own mocked tenant's data and the token cache ends up with two distinct keys.",
+    "type": "auto",
+    "tests": ["tests/test_middleware.py::test_concurrent_requests_with_different_credentials_do_not_cross_tenant"]
+  },
+  {
+    "id": "TC13",
+    "ac": "AC10",
+    "type": "manual",
+    "text": "README.md Connector section and Header credential table are present and correct.",
+    "steps": [
+      "Open README.md in the delivered repo",
+      "Diff the \"MSPbots Connector\" paragraph against ~/.claude/skills/vendor-mcp-development/reference/readme-connector-section.md",
+      "Check the Authentication headers table lists X-Ramp-Client-Id and X-Ramp-Client-Secret with where-to-obtain text"
+    ],
+    "expect": "Connector paragraph is verbatim-identical to the reference file; both headers are documented with where to obtain them in the Ramp Developer Portal.",
+    "result": "untested"
+  }
+]
