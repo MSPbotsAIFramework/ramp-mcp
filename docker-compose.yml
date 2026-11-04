@@ -1,0 +1,11 @@
+# Local debugging only -- not used in production deployment.
+# Put your own Ramp developer-app credentials in a local, untracked .env file
+# and reference them here, or pass them directly on each curl call's headers.
+services:
+  ramp-mcp:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      MCP_HTTP_HOST: 0.0.0.0
+      MCP_HTTP_PORT: 8080
